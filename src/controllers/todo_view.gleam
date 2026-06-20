@@ -4,7 +4,7 @@ import mist.{type ResponseData}
 import lustre/element/html.{html}
 import lustre/attribute
 import lustre/element
-import logging
+// import logging
 
 fn create_html() -> String {
     html([attribute.lang("ja")], [
@@ -126,8 +126,10 @@ fn create_html() -> String {
 
 pub fn view() -> Response(ResponseData) {
 
-  logging.log(logging.Info, create_html())
-    response.new(200)
+  // debugging
+  // logging.log(logging.Info, create_html())
+
+  response.new(200)
   |> response.set_body(mist.Bytes(bytes_tree.from_string(create_html())))
   |> response.set_header("content-type", "text/html")
 }
