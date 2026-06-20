@@ -6,7 +6,6 @@ import lustre/attribute
 import lustre/element
 import lustre/element/html.{html}
 import mist.{type ResponseData}
-import logging
 
 // HTML ------------------------------------------------------------------------
 

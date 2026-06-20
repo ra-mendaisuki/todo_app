@@ -4,7 +4,6 @@ import mist.{type ResponseData}
 import lustre/element/html.{html}
 import lustre/attribute
 import lustre/element
-import lustre/event
 import logging
 
 fn create_html() -> String {

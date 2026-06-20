@@ -2,7 +2,6 @@ import lustre/element
 import gleam/bytes_tree
 import gleam/http/response.{type Response}
 import mist.{type ResponseData}
-import logging
 import lustre/element/html.{html}
 import lustre/attribute
 

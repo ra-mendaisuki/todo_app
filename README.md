@@ -1,20 +1,20 @@
-# webapp_gleam
+# todo_app
 
-[![Package Version](https://img.shields.io/hexpm/v/webapp_gleam)](https://hex.pm/packages/webapp_gleam)
-[![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/webapp_gleam/)
+[![Package Version](https://img.shields.io/hexpm/v/todo_app)](https://hex.pm/packages/todo_app)
+[![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/todo_app/)
 
 ```sh
-gleam add webapp_gleam@1
+gleam add todo_app@1
 ```
 ```gleam
-import webapp_gleam
+import todo_app
 
 pub fn main() -> Nil {
   // TODO: An example of the project in use
 }
 ```
 
-Further documentation can be found at <https://hexdocs.pm/webapp_gleam>.
+Further documentation can be found at <https://hexdocs.pm/todo_app>.
 
 ## Development
 
