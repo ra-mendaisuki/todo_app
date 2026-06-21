@@ -29,9 +29,6 @@ fn create_html() -> String {
 
 
 pub fn view() -> Response(ResponseData) {
-  // sql.create_todo_table()
-  echo sql.select_todo_table()
-
   response.new(200)
   |> response.set_body(mist.Bytes(bytes_tree.from_string(create_html())))
   |> response.set_header("content-type", "text/html")
