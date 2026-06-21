@@ -3,15 +3,14 @@ import gleam/string
 import gleam/bytes_tree
 import gleam/uri
 import gleam/result
-import gleam/http/request.{type Request}
-import gleam/http/response.{type Response}
 import mist.{type Connection, type ResponseData}
 import lustre/element/html.{html}
 import lustre/attribute
 import lustre/element
 import libraries/get_request
 import libraries/sql
-// import logging
+import wisp.{type Request, type Response}
+import gleam/http.{Get}
 
 const name = "cont"
 
@@ -115,17 +114,13 @@ fn list_html() -> String {
 }
 
 
-pub fn list() -> Response(ResponseData) {
-
-  // debugging
-  // logging.log(logging.Info, create_html())
-
-  response.new(200)
-  |> response.set_body(mist.Bytes(bytes_tree.from_string(list_html())))
-  |> response.set_header("content-type", "text/html")
+pub fn list(req: Request) -> Response {
+  use <- wisp.require_method(req, Get)
+  wisp.ok()
+  |> wisp.html_body(list_html())
 }
 
-fn create_html(req: Request(Connection)) -> String {
+fn create_html(req: Request) -> String {
     html([attribute.lang("ja")], [
       html.head([], [
         html.meta([attribute.charset("utf-8")]),
@@ -164,31 +159,32 @@ fn create_html(req: Request(Connection)) -> String {
 }
 
 
-pub fn create(req: Request(Connection)) -> Response(ResponseData) {
-  response.new(200)
-  |> response.set_body(mist.Bytes(bytes_tree.from_string(create_html(req))))
-  |> response.set_header("content-type", "text/html")
+pub fn create(req: Request) -> Response {
+    use <- wisp.require_method(req, Get)
+    wisp.ok()
+    |> wisp.html_body(create_html(req))
 }
 
-fn write_html(req: Request(Connection)) -> String {
-  let url = result.unwrap(uri.origin(request.to_uri(req)), "http://localhost:8080/")
-  html([attribute.lang("ja")], [
-    html.head([], [
-      html.meta([attribute.charset("utf-8")]),
-      html.meta([
-        attribute.name("viewport"),
-        attribute.content("width=device-width, initial-scale=1.0"),
-      ]),
-      html.meta([attribute.http_equiv("refresh"), attribute.content("0; URL=" <> url)]),
-    ]),
-  ])
-  |> element.to_readable_string
-}
+// fn write_html(req: Request) -> String {
+//   let url = result.unwrap(uri.origin(request.to_uri(req)), "http://localhost:8080/")
+//   req.path
+//   html([attribute.lang("ja")], [
+//     html.head([], [
+//       html.meta([attribute.charset("utf-8")]),
+//       html.meta([
+//         attribute.name("viewport"),
+//         attribute.content("width=device-width, initial-scale=1.0"),
+//       ]),
+//       html.meta([attribute.http_equiv("refresh"), attribute.content("0; URL=" <> url)]),
+//     ]),
+//   ])
+//   |> element.to_readable_string
+// }
 
-pub fn write(req: Request(Connection)) -> Response(ResponseData) {
-  let a = get_request.get(req, string.length(name)+1)
-  sql.insert_todo(a)
-  response.new(200)
-  |> response.set_body(mist.Bytes(bytes_tree.from_string(write_html(req))))
-  |> response.set_header("content-type", "text/html")
-}
+// pub fn write(req: Request(Connection)) -> Response(ResponseData) {
+//   let a = get_request.get(req, string.length(name)+1)
+//   sql.insert_todo(a)
+//   response.new(200)
+//   |> response.set_body(mist.Bytes(bytes_tree.from_string(write_html(req))))
+//   |> response.set_header("content-type", "text/html")
+// }

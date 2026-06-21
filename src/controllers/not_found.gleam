@@ -1,9 +1,9 @@
 import lustre/element
 import gleam/bytes_tree
-import gleam/http/response.{type Response}
-import mist.{type ResponseData}
 import lustre/element/html.{html}
 import lustre/attribute
+import wisp.{type Request, type Response}
+import gleam/http.{Get}
 
 fn create_html() -> String {
     html([attribute.lang("ja")], [
@@ -57,7 +57,8 @@ fn create_html() -> String {
     |> element.to_readable_string
 }
 
-pub fn view()->Response(ResponseData) {
-    response.new(404)
-    |> response.set_body(mist.Bytes(bytes_tree.from_string(create_html())))
+pub fn view(req: Request)->Response {
+    use <- wisp.require_method(req, Get)
+    wisp.ok()
+    |> wisp.html_body(create_html())
 }
