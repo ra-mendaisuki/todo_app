@@ -17,6 +17,8 @@ import libraries/get_request
 import libraries/sql
 // import logging
 
+const name = "cont"
+
 fn list_html() -> String {
   let a = case sql.select_todo_table() {
     Ok(res) -> res
@@ -154,7 +156,7 @@ fn create_html(req: Request(Connection)) -> String {
           html.main([], [
             html.form([attribute.method("POST"), attribute.action("/write")], [
               html.p([], [
-                 html.textarea([attribute.name("cont"), attribute.rows(5), attribute.cols(60)], "")
+                 html.textarea([attribute.name(name), attribute.rows(5), attribute.cols(60)], "")
               ]),
               html.input([attribute.type_("submit"), attribute.value("書き込み")])
             ])
@@ -188,7 +190,7 @@ fn write_html(req: Request(Connection)) -> String {
 }
 
 pub fn write(req: Request(Connection)) -> Response(ResponseData) {
-  let a = get_request.get(req, 5)
+  let a = get_request.get(req, string.length(name)+1)
   sql.insert_todo(a)
   response.new(200)
   |> response.set_body(mist.Bytes(bytes_tree.from_string(write_html(req))))
