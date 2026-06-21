@@ -15,13 +15,13 @@ RUN go install github.com/asdf-vm/asdf/cmd/asdf@v0.19.0
 RUN dnf install -y \
     autoconf \
     ncurses-devel
-# 4. asdfに必要なデータディレクトリと、goバイナリがある場所を「絶対パス」で確実にPATHへ追加
+
+# asdfの環境変数を設定
 ENV ASDF_DATA_DIR="/root/.asdf"
 ENV PATH="/go/bin:/root/go/bin:${ASDF_DATA_DIR}/shims:${PATH}"
-
-# 5. バージョン確認 (これで exit 127 が解消されます)
 RUN asdf version
 
+# asdfでgleamをインストールするためのプラグインを追加
 RUN asdf plugin add erlang https://github.com/asdf-vm/asdf-erlang.git
 RUN asdf plugin add rebar https://github.com/Stratus3D/asdf-rebar.git
 RUN asdf plugin add gleam https://github.com/vic/asdf-gleam.git
@@ -30,8 +30,10 @@ RUN asdf set -u erlang latest
 RUN asdf set -u rebar latest
 RUN asdf set -u gleam latest
 
+# asdfでgleamをインストール
 RUN asdf install
 
+# gleamのバージョンを確認
 RUN gleam --version
 
 # 作業ディレクトリの設定
