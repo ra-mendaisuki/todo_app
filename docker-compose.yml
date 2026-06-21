@@ -1,0 +1,12 @@
+services:
+  gleam_env:
+    build: .
+    container_name: rocky_gleam_sqlite
+    tty: true
+    stdin_open: true
+    volumes:
+      - ./:/app
+    restart: always
+    ports:
+      - "8080:8080"
+    command: gleam run
