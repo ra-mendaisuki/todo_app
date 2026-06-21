@@ -10,8 +10,8 @@ pub fn main() {
   let assert Ok(_) =
     router.router
     |> mist.new
-    |> mist.bind("localhost")
-    |> mist.port(1234)
+    |> mist.bind("0.0.0.0")
+    |> mist.port(8080)
     |> mist.start
 
   process.sleep_forever()
