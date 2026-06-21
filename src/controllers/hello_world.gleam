@@ -1,10 +1,12 @@
 import gleam/bytes_tree
+import gleam/result
 import gleam/http/response.{type Response}
 import mist.{type ResponseData}
 import lustre/element/html.{html}
 import lustre/attribute
 import lustre/element
 import libraries/sql
+import logging
 
 fn create_html() -> String {
     html([attribute.lang("ja")], [
@@ -27,8 +29,8 @@ fn create_html() -> String {
 
 
 pub fn view() -> Response(ResponseData) {
-  sql.create_todo_table()
-  sql.select_todo_table()
+  // sql.create_todo_table()
+  echo sql.select_todo_table()
 
   response.new(200)
   |> response.set_body(mist.Bytes(bytes_tree.from_string(create_html())))

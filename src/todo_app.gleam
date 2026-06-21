@@ -11,8 +11,7 @@ pub fn main() {
     router.router
     |> mist.new
     |> mist.bind("localhost")
-    |> mist.with_ipv6
-    |> mist.port(4000)
+    |> mist.port(1234)
     |> mist.start
 
   process.sleep_forever()

@@ -1,12 +1,13 @@
 import gleam/bytes_tree
+import gleam/http/request.{type Request}
 import gleam/http/response.{type Response}
-import mist.{type ResponseData}
+import mist.{type Connection, type ResponseData}
 import lustre/element/html.{html}
 import lustre/attribute
 import lustre/element
 // import logging
 
-fn create_html() -> String {
+fn list_html() -> String {
     html([attribute.lang("ja")], [
       html.head([], [
         html.meta([attribute.charset("utf-8")]),
@@ -14,109 +15,44 @@ fn create_html() -> String {
           attribute.name("viewport"),
           attribute.content("width=device-width, initial-scale=1.0"),
         ]),
-        html.title([], "Simple HTML Todo App"),
-        html.style([], "
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .todo-container {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            width: 300px;
-        }
-        h2 { margin-top: 0; text-align: center; color: #333; }
-        .input-area { display: flex; gap: 10px; margin-bottom: 20px; }
-        input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-        button { padding: 8px 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        button:hover { background: #218838; }
-        ul { list-style: none; padding: 0; margin: 0; }
-        li {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px;
-            border-bottom: 1px solid #eee;
-        }
-        .delete-btn { background: #dc3545; padding: 4px 8px; font-size: 12px; }
-        .delete-btn:hover { background: #c82333; }
-        "),
+        html.title([], "Todoアプリ"),
       ]),
       html.body(
         [],
         [
-          html.div([attribute.class("todo-container")], [
-            html.h2([], [html.text("My To-Do List")]),
-            html.div([attribute.class("input-area")], [
-              html.input([
-                attribute.type_("text"),
-                attribute.id("taskInput"),
-                attribute.placeholder("Add a new task...")
-                ]),
-              html.button([
-                attribute.attribute(
-                  "onclick",
-                  "addTask()"
-                ),
-              ], [html.text("Add")])
-            ]),
-            html.ul([attribute.id("taskList")], [])
+          html.header([], [
+            html.h1([], [html.text("やることリスト")]),
+            html.nav([], [
+              html.ul([], [
+                html.li([], [
+                  html.a([attribute.href("/")], [html.text("ホーム")]),
+                  html.a([attribute.href("/create")], [html.text("新しいタスクを追加")])
+                ])
+              ])
+            ])
           ]),
-          html.script([], "
-              // Load tasks from Local Storage on startup
-              document.addEventListener('DOMContentLoaded', loadTasks);
-
-              function addTask() {
-                  const taskInput = document.getElementById('taskInput');
-                  const text = taskInput.value.trim();
-                  if (!text) return alert('Please enter a task!');
-
-                  createTaskElement(text);
-                  saveTaskToLocal(text);
-                  taskInput.value = '';
-              }
-
-              function createTaskElement(text) {
-                  const taskList = document.getElementById('taskList');
-                  const li = document.createElement('li');
-                  li.textContent = text;
-
-                  const deleteBtn = document.createElement('button');
-                  deleteBtn.textContent = 'X';
-                  deleteBtn.className = 'delete-btn';
-                  deleteBtn.onclick = () => {
-                      li.remove();
-                      removeTaskFromLocal(text);
-                  };
-
-                  li.appendChild(deleteBtn);
-                  taskList.appendChild(li);
-              }
-
-              function saveTaskToLocal(text) {
-                  const tasks = JSON.parse(localStorage.getItem('todos')) || [];
-                  tasks.push(text);
-                  localStorage.setItem('todos', JSON.stringify(tasks));
-              }
-
-              function loadTasks() {
-                  const tasks = JSON.parse(localStorage.getItem('todos')) || [];
-                  tasks.forEach(task => createTaskElement(task));
-              }
-
-              function removeTaskFromLocal(text) {
-                  const tasks = JSON.parse(localStorage.getItem('todos')) || [];
-                  tasks = tasks.filter(task => task !== text);
-                  localStorage.setItem('todos', JSON.stringify(tasks));
-              }
-          ")
+          html.main([], [
+            html.section([], [
+              html.form([attribute.method("GET"), attribute.action("/index")], [
+                html.input([
+                  attribute.type_("search"),
+                  attribute.name("search_word"),
+                  attribute.value("")
+                ]),
+                html.input([attribute.type_("submit"), attribute.value("検索")])
+              ])
+            ]),
+            html.section([], [
+              html.h2([], [html.text("完了したタスク")]),
+              html.ul([attribute.class("completed-task-list")], [
+                // ここに完了したタスクがリストされる
+              ]),
+              html.h2([], [html.text("未完了のタスク")]),
+              html.ul([attribute.class("incomplete-task-list")], [
+                // ここに未完了のタスクがリストされる
+              ])
+            ])
+          ]),
         ],
       ),
     ])
@@ -124,12 +60,62 @@ fn create_html() -> String {
 }
 
 
-pub fn view() -> Response(ResponseData) {
+pub fn list() -> Response(ResponseData) {
 
   // debugging
   // logging.log(logging.Info, create_html())
 
   response.new(200)
-  |> response.set_body(mist.Bytes(bytes_tree.from_string(create_html())))
+  |> response.set_body(mist.Bytes(bytes_tree.from_string(list_html())))
+  |> response.set_header("content-type", "text/html")
+}
+
+fn create_html(req: Request(Connection)) -> String {
+    html([attribute.lang("ja")], [
+      html.head([], [
+        html.meta([attribute.charset("utf-8")]),
+        html.meta([
+          attribute.name("viewport"),
+          attribute.content("width=device-width, initial-scale=1.0"),
+        ]),
+        html.title([], "Todoアプリ"),
+      ]),
+      html.body(
+        [],
+        [
+          html.header([], [
+            html.h1([], [html.text("やること書き込みページ")]),
+            html.nav([], [
+              html.ul([], [
+                html.li([], [
+                  html.a([attribute.href("/")], [html.text("ホーム")]),
+                  html.a([attribute.href("/create")], [html.text("新しいタスクを追加")])
+                ])
+              ])
+            ])
+          ]),
+          html.main([], [
+            html.form([attribute.method("POST"), attribute.action("/write")], [
+              html.p([], [
+                 html.textarea([attribute.name("contents"), attribute.rows(5), attribute.cols(60)], "")
+              ]),
+              html.input([
+                attribute.type_("hidden"),
+                attribute.name("now_datetime"),
+                attribute.value("")
+              ]),
+              html.input([attribute.type_("submit"), attribute.value("書き込み")])
+            ])
+          ]),
+        ],
+      ),
+    ])
+    |> element.to_readable_string
+}
+
+
+pub fn create(req: Request(Connection)) -> Response(ResponseData) {
+  response.new(200)
+  |> response.set_body(mist.Bytes(bytes_tree.from_string(create_html(req))))
   |> response.set_header("content-type", "text/html")
 }

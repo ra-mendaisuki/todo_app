@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>
+        <!-- タイトルブロックを定義 -->
+        Todoアプリ
+    </title>
+</head>
+
+<body>
+    <header>
+        <h1>
+            やることリスト
+        </h1>
+        <!-- 各画面へのメニュー -->
+        <nav>
+            <ul>
+                <li>
+                    <!-- 「/」にアクセスするURLを作成 -->
+                    <a href="{{url_for('index')}}">トップページ</a>
+                </li>
+                <li>
+                    <!-- 「/write」にアクセスするURLを作成 -->
+                    <a href="{{url_for('write')}}">書き込みページ</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section>
+            <form action="{{url_for('index')}}" method="GET">
+                <input type="search" name="search_word" value="{{search_word}}"></label>
+                <input type="submit" value="検索">
+            </form>
+        </section>
+        <section>
+            {% for message in message_list %}
+            <article>
+                <p>{{message.id}} - {{message.user_name}}</p>
+                <p>{{message.contents}}</p>
+                <!-- 更新、削除リンク --- (※9) -->
+                <p><a href="{{url_for('update', message_id=message.id)}}">更新</a></p>
+                <p><a href="{{url_for('delete', message_id=message.id)}}">削除</a></p>
+            </article>
+            {% endfor %}
+        </section>
+    </main>
+</body>
+
+</html>
