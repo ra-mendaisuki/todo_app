@@ -9,11 +9,11 @@ import controllers/lustre_view
 
 pub fn router(req: Request(Connection)) -> Response(ResponseData) {
       let _ = get_connection(req)
-      echo req
       echo request.path_segments(req)
       case request.path_segments(req) {
         [] ->todo_view.list()
         ["create"] ->todo_view.create(req)
+        ["write"] -> todo_view.write(req)
         ["test"] ->lustre_view.view()
         _ -> not_found.view()
       }

@@ -1,13 +1,36 @@
+import gleam/list
+import gleam/string
+import logging
+import gleam/bit_array
 import gleam/bytes_tree
+import gleam/uri
+import gleam/result
+import gleam/http
+import gleam/io
 import gleam/http/request.{type Request}
 import gleam/http/response.{type Response}
 import mist.{type Connection, type ResponseData}
 import lustre/element/html.{html}
 import lustre/attribute
 import lustre/element
+import libraries/get_request
+import libraries/sql
 // import logging
 
 fn list_html() -> String {
+  let a = case sql.select_todo_table() {
+    Ok(res) -> res
+    Error(_nil) -> []
+  }
+  echo a
+  let tasks = list.map(
+    a,
+    fn(select_record){
+      let #(a,b,c) = select_record
+      html.div([attribute.class("todo-container")], [html.p([], [html.text("やること: " <> a)]) ,html.p([], [html.text("作成日時:" <> b), html.text("  更新日時: " <> c)])])
+    }
+  )
+
     html([attribute.lang("ja")], [
       html.head([], [
         html.meta([attribute.charset("utf-8")]),
@@ -16,6 +39,44 @@ fn list_html() -> String {
           attribute.content("width=device-width, initial-scale=1.0"),
         ]),
         html.title([], "Todoアプリ"),
+        html.style([], "
+        head {
+              font-family: Arial, sans-serif;
+              background-color: #f4f4f9;
+              justify-content: center;
+              align-items: center;
+        }
+          body {
+              font-family: Arial, sans-serif;
+              background-color: #f4f4f9;
+              justify-content: center;
+              align-items: center;
+              height: 100vh;
+              margin: 0;
+          }
+          .todo-container {
+              background: white;
+              padding: 10px;
+              margin: 5px;
+              border-radius: 10px;
+              box-shadow: 0 4px 6px rgba(0,0,0,0.10);
+              width: 400px;
+          }
+          h2 { margin-top: 0;  color: #333; }
+          .input-area { gap: 10px; margin-bottom: 20px; }
+          input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+          button { padding: 8px 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
+          button:hover { background: #218838; }
+          ul { list-style: none; padding: 0; margin: 0; }
+          li {
+              justify-content: space-between;
+              align-items: center;
+              padding: 8px;
+              border-bottom: 1px solid #eee;
+          }
+          .delete-btn { background: #dc3545; padding: 4px 8px; font-size: 12px; }
+          .delete-btn:hover { background: #c82333; }
+        ")
       ]),
       html.body(
         [],
@@ -43,14 +104,10 @@ fn list_html() -> String {
               ])
             ]),
             html.section([], [
-              html.h2([], [html.text("完了したタスク")]),
-              html.ul([attribute.class("completed-task-list")], [
-                // ここに完了したタスクがリストされる
-              ]),
-              html.h2([], [html.text("未完了のタスク")]),
-              html.ul([attribute.class("incomplete-task-list")], [
-                // ここに未完了のタスクがリストされる
-              ])
+              html.h2([], [html.text("タスク")]),
+              html.ul([attribute.class("task-list")],
+                tasks
+              ),
             ])
           ]),
         ],
@@ -97,12 +154,7 @@ fn create_html(req: Request(Connection)) -> String {
           html.main([], [
             html.form([attribute.method("POST"), attribute.action("/write")], [
               html.p([], [
-                 html.textarea([attribute.name("contents"), attribute.rows(5), attribute.cols(60)], "")
-              ]),
-              html.input([
-                attribute.type_("hidden"),
-                attribute.name("now_datetime"),
-                attribute.value("")
+                 html.textarea([attribute.name("cont"), attribute.rows(5), attribute.cols(60)], "")
               ]),
               html.input([attribute.type_("submit"), attribute.value("書き込み")])
             ])
@@ -117,5 +169,28 @@ fn create_html(req: Request(Connection)) -> String {
 pub fn create(req: Request(Connection)) -> Response(ResponseData) {
   response.new(200)
   |> response.set_body(mist.Bytes(bytes_tree.from_string(create_html(req))))
+  |> response.set_header("content-type", "text/html")
+}
+
+fn write_html(req: Request(Connection)) -> String {
+  let url = result.unwrap(uri.origin(request.to_uri(req)), "http://localhost:8080/")
+  html([attribute.lang("ja")], [
+    html.head([], [
+      html.meta([attribute.charset("utf-8")]),
+      html.meta([
+        attribute.name("viewport"),
+        attribute.content("width=device-width, initial-scale=1.0"),
+      ]),
+      html.meta([attribute.http_equiv("refresh"), attribute.content("0; URL=" <> url)]),
+    ]),
+  ])
+  |> element.to_readable_string
+}
+
+pub fn write(req: Request(Connection)) -> Response(ResponseData) {
+  let a = get_request.get(req, 5)
+  sql.insert_todo(a)
+  response.new(200)
+  |> response.set_body(mist.Bytes(bytes_tree.from_string(write_html(req))))
   |> response.set_header("content-type", "text/html")
 }
