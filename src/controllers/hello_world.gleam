@@ -1,12 +1,9 @@
 import gleam/bytes_tree
-import gleam/result
 import gleam/http/response.{type Response}
 import mist.{type ResponseData}
 import lustre/element/html.{html}
 import lustre/attribute
 import lustre/element
-import libraries/sql
-import logging
 
 fn create_html() -> String {
     html([attribute.lang("ja")], [

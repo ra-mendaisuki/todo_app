@@ -1,12 +1,8 @@
 import gleam/list
 import gleam/string
-import logging
-import gleam/bit_array
 import gleam/bytes_tree
 import gleam/uri
 import gleam/result
-import gleam/http
-import gleam/io
 import gleam/http/request.{type Request}
 import gleam/http/response.{type Response}
 import mist.{type Connection, type ResponseData}

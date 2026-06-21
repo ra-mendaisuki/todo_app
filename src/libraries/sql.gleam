@@ -1,9 +1,5 @@
 import sqlight
 import gleam/dynamic/decode
-import logging
-import gleam/list
-import gleam/result
-import models/todo_model.{type Todo}
 
 pub fn create_todo_table() {
   use connection <- sqlight.with_connection("src/libraries/sqlite/file.db")

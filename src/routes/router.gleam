@@ -12,6 +12,7 @@ pub fn router(req: Request(Connection)) -> Response(ResponseData) {
       echo request.path_segments(req)
       case request.path_segments(req) {
         [] ->todo_view.list()
+        ["hello"] -> hello_world.view()
         ["create"] ->todo_view.create(req)
         ["write"] -> todo_view.write(req)
         ["test"] ->lustre_view.view()
