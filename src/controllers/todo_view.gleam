@@ -11,6 +11,7 @@ import libraries/get_request
 import libraries/sql
 import wisp.{type Request, type Response}
 import gleam/http.{Get}
+import gleam/http/request
 
 const name = "cont"
 
@@ -165,26 +166,40 @@ pub fn create(req: Request) -> Response {
     |> wisp.html_body(create_html(req))
 }
 
-// fn write_html(req: Request) -> String {
-//   let url = result.unwrap(uri.origin(request.to_uri(req)), "http://localhost:8080/")
-//   req.path
-//   html([attribute.lang("ja")], [
-//     html.head([], [
-//       html.meta([attribute.charset("utf-8")]),
-//       html.meta([
-//         attribute.name("viewport"),
-//         attribute.content("width=device-width, initial-scale=1.0"),
-//       ]),
-//       html.meta([attribute.http_equiv("refresh"), attribute.content("0; URL=" <> url)]),
-//     ]),
-//   ])
-//   |> element.to_readable_string
-// }
+fn write_html(path: String) -> String {
+  html([attribute.lang("ja")], [
+    html.head([], [
+      html.meta([attribute.charset("utf-8")]),
+      html.meta([
+        attribute.name("viewport"),
+        attribute.content("width=device-width, initial-scale=1.0"),
+      ]),
+      html.meta([attribute.http_equiv("refresh"), attribute.content("0; URL=" <> path <> "/")]),
+    ]),
+  ])
+  |> element.to_readable_string
+}
 
-// pub fn write(req: Request(Connection)) -> Response(ResponseData) {
-//   let a = get_request.get(req, string.length(name)+1)
-//   sql.insert_todo(a)
-//   response.new(200)
-//   |> response.set_body(mist.Bytes(bytes_tree.from_string(write_html(req))))
-//   |> response.set_header("content-type", "text/html")
-// }
+pub fn write(req: Request) -> Response {
+  // let a = get_request.get(req, string.length(name)+1)
+  use formdata <- wisp.require_form(req)
+  let url = result.unwrap(uri.origin(request.to_uri(req)), "http://localhost:8080/")
+
+  let result = {
+    use cont <- result.try(list.key_find(formdata.values, name))
+    Ok(cont)
+  }
+  case result {
+    Ok(cont) -> {
+      sql.insert_todo(cont)
+      wisp.ok()
+      |> wisp.html_body(write_html(url))
+    }
+    Error(_) -> {
+      echo "Error: No value found for key 'cont'"
+      wisp.bad_request("Invalid formdata")
+      |> wisp.html_body("Error: No value found for key 'cont'")
+    }
+  }
+
+}

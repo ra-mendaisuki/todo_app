@@ -34,6 +34,7 @@ pub fn handle_request(req: Request) -> Response {
   case wisp.path_segments(req) {
     [] ->todo_view.list(req)
     ["create"] ->todo_view.create(req)
+    ["write"] -> todo_view.write(req)
     ["hello"] -> hello_world.view(req)
     _ -> not_found.view(req)
   }
