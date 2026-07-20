@@ -1,13 +1,9 @@
 import gleam/list
-import gleam/string
-import gleam/bytes_tree
 import gleam/uri
 import gleam/result
-import mist.{type Connection, type ResponseData}
 import lustre/element/html.{html}
 import lustre/attribute
 import lustre/element
-import libraries/get_request
 import libraries/sql
 import wisp.{type Request, type Response}
 import gleam/http.{Get}
@@ -121,7 +117,7 @@ pub fn list(req: Request) -> Response {
   |> wisp.html_body(list_html())
 }
 
-fn create_html(req: Request) -> String {
+fn create_html() -> String {
     html([attribute.lang("ja")], [
       html.head([], [
         html.meta([attribute.charset("utf-8")]),
@@ -163,7 +159,7 @@ fn create_html(req: Request) -> String {
 pub fn create(req: Request) -> Response {
     use <- wisp.require_method(req, Get)
     wisp.ok()
-    |> wisp.html_body(create_html(req))
+    |> wisp.html_body(create_html())
 }
 
 fn write_html(path: String) -> String {

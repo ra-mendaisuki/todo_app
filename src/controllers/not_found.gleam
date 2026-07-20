@@ -1,5 +1,4 @@
 import lustre/element
-import gleam/bytes_tree
 import lustre/element/html.{html}
 import lustre/attribute
 import wisp.{type Request, type Response}
