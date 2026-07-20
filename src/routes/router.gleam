@@ -1,33 +1,32 @@
-import gleam/http/request.{type Request}
-import gleam/http/response.{type Response}
-import logging
-import mist.{type Connection, type ResponseData}
 import controllers/hello_world
 import controllers/not_found
 import controllers/todo_view
-import controllers/lustre_view
+import wisp.{type Request, type Response}
 
+pub fn middleware(
+  req: wisp.Request,
+  handle_request: fn(wisp.Request) -> wisp.Response,
+) -> wisp.Response {
+  let req = wisp.method_override(req)
+  use <- wisp.log_request(req)
+  use <- wisp.rescue_crashes
+  use req <- wisp.handle_head(req)
+  use req <- wisp.csrf_known_header_protection(req)
 
-pub fn router(req: Request(Connection)) -> Response(ResponseData) {
-      let _ = get_connection(req)
-      case request.path_segments(req) {
-        [] -> hello_world.view()
-        ["todo"] ->todo_view.view()
-        ["test"] ->lustre_view.view()
-        _ -> not_found.view()
-      }
-    }
+  handle_request(req)
+}
+pub fn handle_request(req: Request) -> Response {
+  use req <- middleware(req)
 
-fn get_connection(req: Request(Connection)) -> Nil{
-  case mist.get_connection_info(req.body) {
-          Ok(info) -> {
-            logging.log(
-              logging.Info,
-              "Got a request from: " <> mist.connection_info_to_string(info),
-            )
-          }
-          Error(_nil) -> {
-            logging.log(logging.Info, "Failed to get connection info")
-          }
-        }
+  // Wisp doesn't have a special router abstraction, instead we recommend using
+  // regular old pattern matching. This is faster than a router, is type safe,
+  // and means you don't have to learn or be limited by a special DSL.
+  //
+  case wisp.path_segments(req) {
+    [] ->todo_view.list(req)
+    ["create"] ->todo_view.create(req)
+    ["write"] -> todo_view.write(req)
+    ["hello"] -> hello_world.view(req)
+    _ -> not_found.view(req)
+  }
 }
