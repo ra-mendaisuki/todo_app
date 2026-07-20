@@ -24,6 +24,7 @@ gleeunit = ">= 1.11.0 and < 2.0.0"
 gtempo = ">= 7.3.0 and < 8.0.0"
 gleam_json = ">= 3.1.0 and < 4.0.0"
 sqlight = ">= 1.1.0 and < 2.0.0"
+wisp = ">= 2.2.2 and < 3.0.0"
 
 # [dev_dependencies]
 # gleeunit = ">= 1.0.0 and < 2.0.0"
